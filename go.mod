@@ -1,8 +1,8 @@
-module fc-examples
+module main
 
-go 1.18
+go 1.17
 
-require github.com/aliyun/alibaba-cloud-sdk-go v1.63.13
+require github.com/aliyun/alibaba-cloud-sdk-go v1.63.14
 
 require (
 	github.com/jmespath/go-jmespath v0.4.0 // indirect

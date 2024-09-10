@@ -1,0 +1,4 @@
+#!/bin/bash
+
+/code/main
+# go run main.go

@@ -25,48 +25,6 @@ func main() {
 	fmt.Println("REGION:", os.Getenv("FC_REGION"))
 	fmt.Println("ROLE:", os.Getenv("ROLE_NAME"))
 
-	roleName := os.Getenv("ROLE_NAME")
-	region := os.Getenv("FC_REGION")
-	vaultAddr := os.Getenv("VAULT_ADDR")
-	vaultNamespace := os.Getenv("VAULT_NAMESPACE")
-
-	if vaultNamespace != "" {
-		vaultNamespace += "/"
-	}
-
-	var creds auth.Credential
-
-	loginData, err := GenerateLoginData(roleName, creds, region)
-	if err != nil {
-		panic(err)
-	}
-
-	// fmt.Printf("%q", loginData)
-
-	b, err := json.Marshal(loginData)
-	if err != nil {
-		panic(err)
-	}
-
-	loginReq, err := http.NewRequest(http.MethodPost, vaultAddr+"/v1/"+vaultNamespace+"auth/alicloud/login", bytes.NewReader(b))
-	if err != nil {
-		panic(err)
-	}
-
-	resp, err := http.DefaultClient.Do(loginReq)
-	if err != nil {
-		panic(err)
-	}
-	defer resp.Body.Close()
-
-	fmt.Printf("response status code: %d\n", resp.StatusCode)
-
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		panic(err)
-	}
-	fmt.Printf("%s", body)
-
 	http.HandleFunc("/", HelloServer)
 	http.ListenAndServe(":9000", nil)
 }
@@ -155,10 +113,52 @@ func HelloServer(w http.ResponseWriter, r *http.Request) {
 	}
 	defer conn.Close()
 
+	roleName := os.Getenv("ROLE_NAME")
+	region := os.Getenv("FC_REGION")
+	vaultAddr := os.Getenv("VAULT_ADDR")
+	vaultNamespace := os.Getenv("VAULT_NAMESPACE")
+
+	if vaultNamespace != "" {
+		vaultNamespace += "/"
+	}
+
+	var creds auth.Credential
+
+	loginData, err := GenerateLoginData(roleName, creds, region)
+	if err != nil {
+		panic(err)
+	}
+
+	// fmt.Printf("%q", loginData)
+
+	b, err := json.Marshal(loginData)
+	if err != nil {
+		panic(err)
+	}
+
+	loginReq, err := http.NewRequest(http.MethodPost, vaultAddr+"/v1/"+vaultNamespace+"auth/alicloud/login", bytes.NewReader(b))
+	if err != nil {
+		panic(err)
+	}
+
+	resp, err := http.DefaultClient.Do(loginReq)
+	if err != nil {
+		panic(err)
+	}
+	defer resp.Body.Close()
+
+	fmt.Printf("response status code: %d\n", resp.StatusCode)
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Printf("%s", body)
+
 	// Manually write the HTTP response
 	buf.WriteString("HTTP/1.1 200 OK\r\n")
 	buf.WriteString("Content-Type: text/plain\r\n")
 	buf.WriteString("\r\n")
-	buf.WriteString("Hello, World!")
+	buf.WriteString(string(body))
 	buf.Flush()
 }
